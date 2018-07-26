@@ -1,6 +1,4 @@
 import numpy as np
-import matplotlib.pyplot as plt
-
 import tensorflow as tf
 
 from keras.layers import Input, Dense, Reshape, Flatten, Dropout
@@ -13,6 +11,10 @@ def build_critic(img_shape):
     model = Sequential()
 
     model.add(Flatten(input_shape=img_shape))
+    model.add(Dense(2048))
+    model.add(LeakyReLU(alpha=0.2))
+    model.add(Dense(1024))
+    model.add(LeakyReLU(alpha=0.2))
     model.add(Dense(512))
     model.add(LeakyReLU(alpha=0.2))
     model.add(Dense(256))

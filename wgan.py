@@ -1,6 +1,9 @@
 import generator as gen
 import critics as crit
 import numpy as np
+import generator as gen
+import critics as crit
+import numpy as np
 import os
 import tensorflow as tf
 import matplotlib.pyplot as plt
@@ -21,7 +24,6 @@ class GAN:
         self.n_critic = 5
         self.clip_value = 0.01
         self.critic = crit.build_critic(self.image_shape)
-        #Recommended: Adam(0.0001,0.9)
         optimizer = Adam(0.0001,0.5,0.9)
         self.critic.compile(loss=self.wasserstein_loss, optimizer=optimizer, metrics=['accuracy'])
         
@@ -71,7 +73,7 @@ class GAN:
                 
             #Generator
             g_loss = self.combined.train_on_batch(noise,valid)
-            print("%d [D loss: %f] [G loss: %f]" % (epoch, d_loss[0], g_loss[0]))
+            print("%d [D loss: %f] [G loss: %f]" % (epoch, 1-d_loss[0], 1-g_loss[0]))
             if epoch % sample_interval == 0:
                 self.sample_images(epoch)
     def sample_images(self,epoch):
@@ -90,6 +92,4 @@ class GAN:
                 axs[i,j].axis('off')
                 cnt += 1
         fig.savefig("images/mnist_%d.png" % epoch)
-        plt.close()
-
-            
+plt.close()
