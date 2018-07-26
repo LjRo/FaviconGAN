@@ -21,7 +21,8 @@ class GAN:
         self.n_critic = 5
         self.clip_value = 0.01
         self.critic = crit.build_critic(self.image_shape)
-        optimizer = Adam(0.0002,0.5)
+        #Recommended: Adam(0.0001,0.9)
+        optimizer = Adam(0.0001,0.5,0.9)
         self.critic.compile(loss=self.wasserstein_loss, optimizer=optimizer, metrics=['accuracy'])
         
         #Input vector 128
@@ -70,7 +71,7 @@ class GAN:
                 
             #Generator
             g_loss = self.combined.train_on_batch(noise,valid)
-            print("%d [D loss: %f] [G loss: %f]" % (epoch, 1-d_loss[0], 1-g_loss[0]))
+            print("%d [D loss: %f] [G loss: %f]" % (epoch, d_loss[0], g_loss[0]))
             if epoch % sample_interval == 0:
                 self.sample_images(epoch)
     def sample_images(self,epoch):

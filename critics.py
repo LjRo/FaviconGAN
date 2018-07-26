@@ -17,8 +17,7 @@ def build_critic(img_shape):
     model.add(LeakyReLU(alpha=0.2))
     model.add(Dense(256))
     model.add(LeakyReLU(alpha=0.2))
-    model.add(Dense(1, activation='sigmoid'))
-    #model.summary()
+    model.add(Dense(1))
 
     img = Input(shape=img_shape)
     validity = model(img)
