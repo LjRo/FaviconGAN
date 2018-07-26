@@ -1,1 +1,2 @@
-#FaviconGAN
+FaviconGAN
+Project for PSIML2018
