@@ -16,6 +16,15 @@ from keras.datasets import mnist
 from keras.callbacks import TensorBoard
 from PIL import Image
 
+def write_log(callback, names, logs, batch_no):
+    for name, value in zip(names,logs):
+        summary = tf.Summary()
+        summary_value = summary.value.add()
+        summary_value.simple_value= value
+        summary_value.tag = name
+        callback.writer.add_summary(summary,batch_no)
+        callback.writer.flush()
+
 class GAN:
     def __init__(self):
 
@@ -35,6 +44,8 @@ class GAN:
         optimizer = Adam(0.0001,0.5,0.9)
         self.critic.compile(loss=self.wasserstein_loss, optimizer=optimizer, metrics=['accuracy'])
         self.tensorboard = TensorBoard(log_dir="logs/{}".format(time()))
+
+
         #Input vector 128
         z = Input(shape=(self.input_size,))
 
@@ -75,25 +86,25 @@ class GAN:
                 continue
             # preprocessing if required
             x_train.append(im)
-            #print(im.shape)
         
-        #x_train = x_train[0:2000]
-        #x_train[:][:][3] = None
-        #layer_one = np.array(x_train[:][:][:][0])
-        #layer_two = np.array(x_train[:][:][1])
-        #layer_three = np.array(x_train[:][:][2])
-        #print(layer_one.shape)
         x_train=np.array(x_train)
         X_train = (x_train.astype(np.float32)-127.5)/127.5
         #X_train = np.expand_dims(X_train,axis=3)
 
         valid = -np.ones((batch_size,1))
         fake = np.ones((batch_size,1))
-
+    
+        log_dir = "./logs/"
+        callback = TensorBoard(log_dir)
+        callback2 = TensorBoard(log_dir)
+        callback.set_model(self.critic)
+        callback2.set_model(self.generator)
+        train_names = ['d_loss']
+        train_names2 = ['g_loss']
         for epoch in range(epochs):
             #Critic
 
-            if epoch>400:
+            if epoch>1000:
                 self.n_critic=1
             for _ in range(self.n_critic):
                 idx = np.random.randint(0,X_train.shape[0],batch_size)
@@ -105,7 +116,8 @@ class GAN:
                 d_loss_real = self.critic.train_on_batch(imgs,valid)
                 d_loss_fake = self.critic.train_on_batch(gen_imgs,fake)
 
-                d_loss = 0.5*np.add(d_loss_fake, d_loss_real)
+                self.d_loss = 0.5*np.add(d_loss_fake, d_loss_real)
+                write_log(callback,train_names,self.d_loss,epoch)
 
                 for l in self.critic.layers:
                     weights = l.get_weights()
@@ -113,8 +125,10 @@ class GAN:
                     l.set_weights(weights)
                 
             #Generator
-            g_loss = self.combined.train_on_batch(noise,valid)
-            print("%d [D loss: %f] [G loss: %f]" % (epoch, d_loss[0], g_loss[0]))
+            self.g_loss = self.combined.train_on_batch(noise,valid)
+            write_log(callback2,train_names2,self.g_loss,epoch)
+
+            print("%d [D loss: %f] [G loss: %f]" % (epoch, self.d_loss[0], self.g_loss[0]))
             if epoch % sample_interval == 0:
                 self.sample_images(epoch)
     def sample_images(self,epoch):
