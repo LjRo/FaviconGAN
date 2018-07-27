@@ -95,8 +95,9 @@ class GAN:
 
         for epoch in range(epochs):
             #Critic
-            if epoch > 400:
-                self.n_critic = 1
+
+            if epoch>400:
+                self.n_critic=1
             for _ in range(self.n_critic):
                 idx = np.random.randint(0,X_train.shape[0],batch_size)
                 imgs = X_train[idx]
