@@ -41,7 +41,7 @@ class GAN:
     def wasserstein_loss(self, y_true, y_pred):
         return K.mean(y_true*y_pred)
 
-    def __call__(self,epochs, batch_size=128, sample_interval=50):
+    def __call__(self,epochs, batch_size=64, sample_interval=50):
         #Dataset input
         (x_train, y_train), (x_test, y_test) = tf.keras.datasets.fashion_mnist.load_data()
         #x_train = x_train[0:2000]
