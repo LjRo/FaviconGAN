@@ -36,7 +36,7 @@ def build_conv_generator(input_size,img_shape):
     channels = img_shape[2]
     dropout = 0.4
     depth = 128
-    dim = 7
+    dim = 8
 
     model = Sequential()
 
@@ -49,7 +49,7 @@ def build_conv_generator(input_size,img_shape):
     model.add(Activation('relu'))    
 
     # Out: 28 x 28 x 1 grayscale image [0.0,1.0] per pix
-    model.add(Conv2DTranspose(1, (5, 5),strides=(2,2), padding='same',output_shape=(None, 4*dim, 4*dim, 1), data_format='channels_last'))
+    model.add(Conv2DTranspose(channels, (5, 5),strides=(2,2), padding='same',output_shape=(None, 4*dim, 4*dim, channels), data_format='channels_last'))
     model.add(Activation('tanh'))
 
     noise = Input(shape=(input_size,))
