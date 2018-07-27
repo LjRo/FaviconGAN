@@ -28,24 +28,32 @@ def build_critic(img_shape):
 def build_conv_critic(img_shape):
     model = Sequential()
 
-    model.add(Conv2D(16, (3,3), strides=2, input_shape=img_shape, padding="same"))
+    depth = 64
+    dropout = 0.4
+    # In: 1 x 28 x 28, depth=1
+    # Out: 1 x 10 x 10, depth=64
+    #in_shape = (img_shape[2],img_shape[0], img_shape[1])
+    in_shape = img_shape
+    model.add(Conv2D(depth*1, (5, 5), strides=(2, 2), padding="same", input_shape=in_shape, data_format='channels_last'))
     model.add(LeakyReLU(alpha=0.2))
-    model.add(Dropout(0.25))
-    model.add(Conv2D(32, (3,3), strides=2, padding="same"))
-    model.add(ZeroPadding2D(padding=((0,1),(0,1))))
-    model.add(BatchNormalization(momentum=0.8))
+    model.add(Dropout(dropout))
+
+    model.add(Conv2D(depth*2, (5, 5), strides=(2,2), padding='same'))
     model.add(LeakyReLU(alpha=0.2))
-    model.add(Dropout(0.25))
-    model.add(Conv2D(64, (3,3), strides=2, padding="same"))
-    model.add(BatchNormalization(momentum=0.8))
+    model.add(Dropout(dropout))
+
+    model.add(Conv2D(depth*4, (5, 5), strides=(2,2), padding='same'))
     model.add(LeakyReLU(alpha=0.2))
-    model.add(Dropout(0.25))
-    model.add(Conv2D(128, (3,3), strides=1, padding="same"))
-    model.add(BatchNormalization(momentum=0.8))
+    model.add(Dropout(dropout))
+
+    model.add(Conv2D(depth*8, (5, 5), strides=(1,1), padding='same'))
     model.add(LeakyReLU(alpha=0.2))
-    model.add(Dropout(0.25))
+    model.add(Dropout(dropout))
+
+    # Out: 1-dim probability
     model.add(Flatten())
     model.add(Dense(1))
+    model.add(Activation('sigmoid'))
 
     img = Input(shape=img_shape)
     validity = model(img)

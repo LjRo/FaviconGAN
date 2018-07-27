@@ -19,11 +19,11 @@ class GAN:
         self.input_size = 128
         self.image_shape = (28,28,1)
         #Init Generator
-        self.generator = gen.build_generator(self.input_size,self.image_shape)
+        self.generator = gen.build_conv_generator(self.input_size,self.image_shape)
 
         self.n_critic = 5
         self.clip_value = 0.01
-        self.critic = crit.build_critic(self.image_shape)
+        self.critic = crit.build_conv_critic(self.image_shape)
         optimizer = Adam(0.0001,0.5,0.9)
         self.critic.compile(loss=self.wasserstein_loss, optimizer=optimizer, metrics=['accuracy'])
         

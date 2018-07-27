@@ -34,20 +34,37 @@ def build_generator(input_size,img_shape):
 
 def build_conv_generator(input_size,img_shape): 
     channels = img_shape[2]
-    
+    dropout = 0.4
+    depth = 64+64+64+64
+    dim = 7
+
     model = Sequential()
-    model.add(Dense(128 * 7 * 7, activation="relu", input_dim=input_size))
-    model.add(Reshape((7, 7, 128)))
-    model.add(UpSampling2D(size=(2, 2)))
-    model.add(Conv2D(128, (4,4), padding="same"))
-    model.add(BatchNormalization(momentum=0.8))
-    model.add(Activation("relu"))
-    model.add(UpSampling2D())
-    model.add(Conv2D(64, (4,4), padding="same"))
-    model.add(BatchNormalization(momentum=0.8))
-    model.add(Activation("relu"))
-    model.add(Conv2D(channels, (4,4), padding="same"))
-    model.add(Activation("tanh"))
+
+    model.add(Dense(dim*dim*depth, input_dim=input_size))
+    model.add((BatchNormalization(momentum=0.9)))
+    model.add(Activation('relu'))
+    model.add(Reshape((dim, dim, depth)))
+    model.add(Dropout(dropout))
+
+    # In: dim x dim x depth
+    # Out: 2*dim x 2*dim x depth/2
+    model.add(UpSampling2D(data_format='channels_last'))
+    model.add(Conv2DTranspose(int(depth/2), (5, 5), padding='same',output_shape=(None, 2*dim, 2*dim, int(depth/2)), data_format='channels_last'))
+    model.add(BatchNormalization(momentum=0.9))
+    model.add(Activation('relu'))    
+
+    model.add(UpSampling2D(data_format='channels_last'))
+    model.add(Conv2DTranspose(int(depth/4), (5, 5), padding='same',output_shape=(None, 4*dim, 4*dim, int(depth/4)), data_format='channels_last'))
+    model.add(BatchNormalization(momentum=0.9))
+    model.add(Activation('relu'))
+
+    model.add(Conv2DTranspose(int(depth/8), (5, 5), padding='same',output_shape=(None, 4*dim, 4*dim,int(depth/8)), data_format='channels_last'))
+    model.add(BatchNormalization(momentum=0.9))
+    model.add(Activation('relu'))
+
+    # Out: 28 x 28 x 1 grayscale image [0.0,1.0] per pix
+    model.add(Conv2DTranspose(1, (5, 5), padding='same',output_shape=(None, 4*dim, 4*dim, 1), data_format='channels_last'))
+    model.add(Activation('sigmoid'))
 
     noise = Input(shape=(input_size,))
     img = model(noise)
