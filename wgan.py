@@ -83,12 +83,9 @@ class GAN:
         #layer_two = np.array(x_train[:][:][1])
         #layer_three = np.array(x_train[:][:][2])
         #print(layer_one.shape)
-        print(len(x_train))
-        print(x_train[0].shape)
         x_train=np.array(x_train)
         X_train = (x_train.astype(np.float32)-127.5)/127.5
         #X_train = np.expand_dims(X_train,axis=3)
-        print(X_train.shape)
 
         valid = -np.ones((batch_size,1))
         fake = np.ones((batch_size,1))
@@ -126,13 +123,13 @@ class GAN:
         gen_imgs = self.generator.predict(noise)
 
         # Rescale images 0 - 1
-        gen_imgs = 0.5 * gen_imgs + 1
-        print(gen_imgs.shape)
+        gen_imgs = 0.5 * gen_imgs + 0.5
+        #print(gen_imgs[0][:][:][:])
         fig, axs = plt.subplots(r, c)
         cnt = 0
         for i in range(r):
             for j in range(c):
-                axs[i,j].imshow(gen_imgs[cnt, :,:,0])
+                axs[i,j].imshow(gen_imgs[cnt, :,:,:])
                 axs[i,j].axis('off')
                 cnt += 1
         fig.savefig("images/mnist_%d.png" % epoch)

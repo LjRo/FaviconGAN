@@ -35,8 +35,8 @@ def build_generator(input_size,img_shape):
 def build_conv_generator(input_size,img_shape): 
     channels = img_shape[2]
     dropout = 0.4
-    depth = 128
-    dim = 8
+    depth = 512
+    dim = 2
 
     model = Sequential()
 
@@ -48,8 +48,15 @@ def build_conv_generator(input_size,img_shape):
     model.add(BatchNormalization(momentum=0.9))
     model.add(Activation('relu'))    
 
+    model.add(Conv2DTranspose(int(depth/4), (5, 5),strides=(2,2), padding='same',output_shape=(None, 4*dim, 4*dim, int(depth/2)), data_format='channels_last'))
+    model.add(Activation('relu'))    
+
+    model.add(Conv2DTranspose(int(depth/8), (5, 5),strides=(2,2), padding='same',output_shape=(None, 8*dim, 8*dim, int(depth/2)), data_format='channels_last'))
+    model.add(BatchNormalization(momentum=0.9))
+    model.add(Activation('relu'))    
+
     # Out: 28 x 28 x 1 grayscale image [0.0,1.0] per pix
-    model.add(Conv2DTranspose(channels, (5, 5),strides=(2,2), padding='same',output_shape=(None, 4*dim, 4*dim, channels), data_format='channels_last'))
+    model.add(Conv2DTranspose(channels, (5, 5),strides=(2,2), padding='same',output_shape=(None, 16*dim, 16*dim, channels), data_format='channels_last'))
     model.add(Activation('tanh'))
 
     noise = Input(shape=(input_size,))
