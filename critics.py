@@ -46,7 +46,6 @@ def build_conv_critic(img_shape):
     # Out: 1-dim probability
     model.add(Flatten())
     model.add(Dense(1))
-    model.add(Activation('sigmoid'))
 
     img = Input(shape=img_shape)
     validity = model(img)

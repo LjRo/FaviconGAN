@@ -73,7 +73,7 @@ class GAN:
                 
             #Generator
             g_loss = self.combined.train_on_batch(noise,valid)
-            print("%d [D loss: %f] [G loss: %f]" % (epoch, 1-d_loss[0], 1-g_loss[0]))
+            print("%d [D loss: %f] [G loss: %f]" % (epoch, d_loss[0], g_loss[0]))
             if epoch % sample_interval == 0:
                 self.sample_images(epoch)
     def sample_images(self,epoch):
