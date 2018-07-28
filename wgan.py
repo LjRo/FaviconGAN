@@ -8,6 +8,7 @@ import os
 import tensorflow as tf
 import matplotlib.pyplot as plt
 import keras.backend as K
+import dataset as data
 from time import time
 from time import gmtime, strftime
 from keras.layers import Input
@@ -66,32 +67,7 @@ class GAN:
     def __call__(self,epochs, batch_size=64, sample_interval=50):
         #Dataset input
         #(x_train, y_train), (x_test, y_test) = tf.keras.datasets.fashion_mnist.load_data()
-        train_path = '.\\filtered\\'
-        train_batch = os.listdir(train_path)
-        x_train = []
-        #train_batch = train_batch[0:2000]
-        # if data are in form of images
-        for sample in train_batch:
-            img_path = train_path+sample
-            try:
-                im = np.asarray(Image.open(img_path))
-                #print(im.shape)
-                if(len(im.shape) > 2):
-                    if(im.shape[2] > 3):
-                        im = np.delete(im,(3),axis=2)
-                    if(im.shape[2] == 2):
-                        continue
-                else:
-                    im = np.array([im,im,im]).T
-            except OSError:
-                continue
-            except ValueError:
-                continue
-            # preprocessing if required
-            x_train.append(im)
-        
-        x_train=np.array(x_train)
-        X_train = (x_train.astype(np.float32)-127.5)/127.5
+        (X_train, Y_train) = data.getIcons50ClassDataset()
         #X_train = np.expand_dims(X_train,axis=3)
 
         valid = -np.ones((batch_size,1))
