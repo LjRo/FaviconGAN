@@ -35,25 +35,39 @@ def build_generator(input_size,img_shape):
 def build_conv_generator(input_size,img_shape): 
     channels = img_shape[2]
     dropout = 0.4
-    depth = 256
-    dim = 4
+    depth = 128
+    dim = 4 
 
     model = Sequential()
 
     model.add(Dense(dim*dim*depth, input_dim=input_size))
     model.add(Activation('relu'))
     model.add(Reshape((dim, dim, depth)))
-  
-    model.add(Conv2DTranspose(int(depth/2), (5, 5),strides=(2,2), padding='same',output_shape=(None, 2*dim, 2*dim, int(depth/2)), data_format='channels_last'))
-    model.add(BatchNormalization(momentum=0.9))
-    model.add(Activation('relu'))    
+    
+    model.add(UpSampling2D(size=(2, 2), data_format="channels_last"))    
+    model.add(Conv2D(128, (5, 5), padding="same"))
+    model.add(BatchNormalization(momentum=0.8))
+    model.add(Activation("relu"))
 
-    model.add(Conv2DTranspose(int(depth/4), (5, 5),strides=(2,2), padding='same',output_shape=(None, 4*dim, 4*dim, int(depth/2)), data_format='channels_last'))
-    model.add(Activation('relu'))    
+    model.add(UpSampling2D(size=(2, 2), data_format="channels_last"))    
+    model.add(Conv2D(64, (5, 5), padding="same"))
+    model.add(BatchNormalization(momentum=0.8))
+    model.add(Activation("relu"))
 
-    # Out: 28 x 28 x 1 grayscale image [0.0,1.0] per pix
-    model.add(Conv2DTranspose(channels, (5, 5),strides=(2,2), padding='same',output_shape=(None, 8*dim, 8*dim, channels), data_format='channels_last'))
-    model.add(Activation('tanh'))
+    model.add(UpSampling2D(size=(2, 2), data_format="channels_last"))    
+    model.add(Conv2D(channels, (5, 5), padding="same"))
+    model.add(BatchNormalization(momentum=0.8))
+    model.add(Activation("tanh"))
+
+    #model.add(Conv2DTranspose(int(depth/2), (5, 5),strides=(2,2), padding='same',output_shape=(None, 2*dim, 2*dim, int(depth/2)), data_format='channels_last'))
+    #model.add(BatchNormalization(momentum=0.9))
+    #model.add(Activation('relu'))    
+
+    #model.add(Conv2DTranspose(int(depth/4), (5, 5),strides=(2,2), padding='same',output_shape=(None, 4*dim, 4*dim, int(depth/2)), data_format='channels_last'))
+    #model.add(Activation('relu'))  
+    #   
+    #model.add(Conv2DTranspose(channels, (5, 5),strides=(2,2), padding='same',output_shape=(None, 8*dim, 8*dim, channels), data_format='channels_last'))
+    #model.add(Activation('tanh'))
 
     noise = Input(shape=(input_size,))
     img = model(noise)

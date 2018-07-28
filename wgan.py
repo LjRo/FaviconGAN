@@ -66,7 +66,7 @@ class GAN:
         train_path = '.\\filtered\\'
         train_batch = os.listdir(train_path)
         x_train = []
-        train_batch = train_batch[0:2000]
+        #train_batch = train_batch[0:2000]
         # if data are in form of images
         for sample in train_batch:
             img_path = train_path+sample

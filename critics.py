@@ -42,9 +42,7 @@ def build_conv_critic(img_shape):
 
     model.add(Conv2D(depth*4, (5, 5), strides=(2,2), padding='same'))
     model.add(LeakyReLU(alpha=0.2))
-    #256
-    model.add(Conv2D(depth*8, (5, 5), strides=(2,2), padding='same'))
-    model.add(LeakyReLU(alpha=0.2))
+
     # Out: 1-dim probability
     model.add(Flatten())
     model.add(Dense(1))
