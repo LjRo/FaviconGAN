@@ -16,6 +16,7 @@ from keras.optimizers import Adam
 from keras.datasets import mnist
 from keras.callbacks import TensorBoard
 from keras.models import model_from_json
+from keras.models import load_model
 from PIL import Image
 
 def write_log(callback, names, logs, batch_no):
@@ -140,8 +141,18 @@ class GAN:
             print("%d [D loss: %f] [G loss: %f]" % (epoch, self.d_loss[0], self.g_loss[0]))
             if epoch % sample_interval == 0:
                 self.sample_images(epoch)
-    def sample_images(self,epoch):
-        r, c = 5, 5
+
+    def generate(self,gen_model,x,y):
+        optimizer = Adam(0.0001,0.5,0.9)
+        gen_model = load_model(gen_model)
+        gen_model.compile(loss=self.wasserstein_loss, optimizer=optimizer, metrics=['accuracy'])
+        self.generator = gen_model
+        #Input vector 128
+
+        
+        self.sample_images(strftime("%H-%M-%S", gmtime()),x,y)
+
+    def sample_images(self,epoch,r=5,c=5):
         noise = np.random.normal(0, 1, (r * c, self.input_size))
         gen_imgs = self.generator.predict(noise)
 
@@ -155,14 +166,6 @@ class GAN:
                 axs[i,j].imshow(gen_imgs[cnt, :,:,:])
                 axs[i,j].axis('off')
                 cnt += 1
-        fig.savefig("images/icon_%d.png" % epoch)
+        fig.savefig("images/icon_%s.png" % epoch)
         plt.close()
-
-    def generate(self,gen_model):
-        self.generator = gen_model
-        optimizer = Adam(0.0001,0.5,0.9)
-        #Input vector 128
-
-        #self.generator.compile(loss=self.wasserstein_loss,optimizer=optimizer,metrics=['accuracy'])
-        self.sample_images(strftime("%H:%M:%S", gmtime()))
 

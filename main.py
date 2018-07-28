@@ -1,17 +1,18 @@
 import wgan
 import sys
-from keras.models import load_model
 import os
 
 if(len(sys.argv) < 2):
     wgan = wgan.GAN()
-    wgan(40000,128,500)
-elif (len(sys.argv) == 3):
+    wgan(100000,256,1000)
+elif (len(sys.argv) == 5):
     if(sys.argv[1] == "load"):
         model_name = sys.argv[2]
-        model = load_model(os.path.join("models",model_name))
+        x = int(sys.argv[3])
+        y = int(sys.argv[4])
+        model = os.path.join("models",model_name)
         wgan = wgan.GAN()
-        wgan.generate(model)
+        wgan.generate(model,x,y)
 elif (len(sys.argv) == 4):
     if(sys.argv[1] == "load"):
         critic_model = sys.argv[2]
