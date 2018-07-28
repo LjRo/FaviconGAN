@@ -9,11 +9,13 @@ import tensorflow as tf
 import matplotlib.pyplot as plt
 import keras.backend as K
 from time import time
+from time import gmtime, strftime
 from keras.layers import Input
 from keras.models import Model, Sequential
 from keras.optimizers import Adam
 from keras.datasets import mnist
 from keras.callbacks import TensorBoard
+from keras.models import model_from_json
 from PIL import Image
 
 def write_log(callback, names, logs, batch_no):
@@ -37,7 +39,7 @@ class GAN:
         self.image_shape = (32,32,3)
         #Init Generator
         self.generator = gen.build_conv_generator(self.input_size,self.image_shape)
-
+        self.save_epoch = 5000
         self.n_critic = 5
         self.clip_value = 0.01
         self.critic = crit.build_conv_critic(self.image_shape)
@@ -117,7 +119,8 @@ class GAN:
                 d_loss_fake = self.critic.train_on_batch(gen_imgs,fake)
 
                 self.d_loss = 0.5*np.add(d_loss_fake, d_loss_real)
-                write_log(callback,train_names,self.d_loss,epoch)
+                if epoch % 50 == 0:
+                    write_log(callback,train_names,self.d_loss,epoch)
 
                 for l in self.critic.layers:
                     weights = l.get_weights()
@@ -126,7 +129,13 @@ class GAN:
                 
             #Generator
             self.g_loss = self.combined.train_on_batch(noise,valid)
-            write_log(callback2,train_names2,self.g_loss,epoch)
+            if epoch % 50 == 0:
+                write_log(callback2,train_names2,self.g_loss,epoch)
+
+            if epoch % self.save_epoch == 0:
+                self.combined.save("models\combined_"+str(epoch)+".model")
+                self.generator.save("models\generator"+str(epoch)+".model")
+                self.critic.save("models\critic_"+str(epoch)+".model")
 
             print("%d [D loss: %f] [G loss: %f]" % (epoch, self.d_loss[0], self.g_loss[0]))
             if epoch % sample_interval == 0:
@@ -146,5 +155,14 @@ class GAN:
                 axs[i,j].imshow(gen_imgs[cnt, :,:,:])
                 axs[i,j].axis('off')
                 cnt += 1
-        fig.savefig("images/mnist_%d.png" % epoch)
-plt.close()
+        fig.savefig("images/icon_%d.png" % epoch)
+        plt.close()
+
+    def generate(self,gen_model):
+        self.generator = gen_model
+        optimizer = Adam(0.0001,0.5,0.9)
+        #Input vector 128
+
+        #self.generator.compile(loss=self.wasserstein_loss,optimizer=optimizer,metrics=['accuracy'])
+        self.sample_images(strftime("%H:%M:%S", gmtime()))
+
