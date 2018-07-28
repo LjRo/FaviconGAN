@@ -1,4 +1,4 @@
 import wgan
 
 wgan = wgan.GAN()
-wgan(40000,128,500)
+wgan(40000,1,500)
