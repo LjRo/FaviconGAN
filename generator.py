@@ -1,7 +1,7 @@
 import numpy as np
 import tensorflow as tf
 from keras.models import Model, Sequential
-from keras.layers import Input, Dense, Reshape, Flatten, Dropout
+from keras.layers import Input, Dense, Reshape, Flatten, Dropout, Embedding, multiply
 from keras.layers import BatchNormalization, Activation, ZeroPadding2D
 from keras.layers.advanced_activations import LeakyReLU
 from keras.layers.convolutional import Convolution2D, Conv2DTranspose, UpSampling2D, Conv2D
@@ -32,31 +32,65 @@ def build_generator(input_size,img_shape):
 
     return Model(noise, img)
 
-def build_conv_generator(input_size,img_shape): 
+    #jeste prilagodjen conditional ganu
+def build_conv_generator(input_size,img_shape,num_classes): 
     channels = img_shape[2]
     dropout = 0.4
     depth = 128
-    dim = 4 
+    dim = 4
 
     model = Sequential()
 
-    model.add(Dense(128 * 16 * 16, input_dim=input_size))
-    model.add(LeakyReLU(alpha=0.2))
-    model.add(Reshape((16, 16, 128)))
+    model.add(Dense(dim*dim*depth, input_dim=input_size))
+    model.add(Activation('relu'))
+    model.add(Reshape((dim, dim, depth)))
+  
+    model.add(Conv2DTranspose(int(depth/2), (5, 5),strides=(2,2), padding='same',output_shape=(None, 2*dim, 2*dim, int(depth/2)), data_format='channels_last'))
+    model.add(BatchNormalization(momentum=0.9))
+    model.add(Activation('relu'))
 
-    model.add(Conv2D(256, (5, 5), strides=(1, 1), padding="same", data_format='channels_last'))
-    model.add(LeakyReLU(alpha=0.2))
+    model.add(Conv2DTranspose(int(depth/2), (5, 5),strides=(2,2), padding='same',output_shape=(None, 2*dim, 2*dim, int(depth/2)), data_format='channels_last'))
+    model.add(BatchNormalization(momentum=0.9))
+    model.add(Activation('relu'))   
+
+    # Out: 28 x 28 x 1 grayscale image [0.0,1.0] per pix
+    model.add(Conv2DTranspose(channels, (5, 5),strides=(2,2), padding='same',output_shape=(None, 4*dim, 4*dim, 1), data_format='channels_last'))
+    model.add(Activation('tanh'))
+
+    noise = Input(shape=(input_size,))
+    label = Input(shape=(1,), dtype='int32')
+    label_embedding = Flatten()(Embedding(num_classes, input_size)(label))
+    model_input = multiply([noise, label_embedding])
+    img = model(model_input)
+
+    return Model([noise, label], img)
+
+# def build_conv_generator(input_size,img_shape): 
+#     channels = img_shape[2]
+#     dropout = 0.4
+#     depth = 128
+#     dim = 4 
+
+#     model = Sequential()
+
+#     model.add(Dense(dim*dim*depth, input_dim=input_size))
+#     model.add(Activation('relu'))
+#     model.add(Reshape((dim, dim, depth)))
     
-    model.add(Conv2DTranspose(256, (4, 4),strides=(2,2), padding='same', data_format='channels_last'))
-    model.add(LeakyReLU(alpha=0.2))
+#     model.add(UpSampling2D(size=(2, 2), data_format="channels_last"))    
+#     model.add(Conv2D(128, (5, 5), padding="same"))
+#     model.add(BatchNormalization(momentum=0.8))
+#     model.add(Activation("relu"))
 
-    model.add(Conv2D(256, (5, 5), strides=(1, 1), padding="same", data_format='channels_last'))
-    model.add(LeakyReLU(alpha=0.2))
+#     model.add(UpSampling2D(size=(2, 2), data_format="channels_last"))    
+#     model.add(Conv2D(64, (5, 5), padding="same"))
+#     model.add(BatchNormalization(momentum=0.8))
+#     model.add(Activation("relu"))
 
-    #model.add(BatchNormalization(momentum=0.8))
-
-    model.add(Conv2D(channels, (7, 7), strides=(1, 1), padding="same", data_format='channels_last'))
-    model.add(Activation("tanh"))
+#     model.add(UpSampling2D(size=(2, 2), data_format="channels_last"))    
+#     model.add(Conv2D(channels, (5, 5), padding="same"))
+#     model.add(BatchNormalization(momentum=0.8))
+#     model.add(Activation("tanh"))
 
     #model.add(Conv2DTranspose(int(depth/2), (5, 5),strides=(2,2), padding='same',output_shape=(None, 2*dim, 2*dim, int(depth/2)), data_format='channels_last'))
     #model.add(BatchNormalization(momentum=0.9))
