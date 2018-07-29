@@ -4,7 +4,7 @@ import os
 
 if(len(sys.argv) < 2):
     wgan = wgan.GAN()
-    wgan(100000,256,1000)
+    wgan(100000,128,1000)
 elif (len(sys.argv) == 5):
     if(sys.argv[1] == "load"):
         model_name = sys.argv[2]

@@ -28,15 +28,17 @@ def build_critic(img_shape):
 def build_conv_critic(img_shape,num_classes):
     model = Sequential()
 
-    depth = 128
-    dim = 32
+    depth =  64
+    #dim = 16
     dropout = 0.4
 
-    model.add(Dense(dim*dim*depth))
+    # model.add(Dense(dim*dim*depth))
+    # model.add(LeakyReLU(alpha=0.2))
+    # model.add(Reshape((dim, dim, depth)))
+    model.add(Conv2D(depth*1, (5, 5), strides=(2, 2), padding="same"))
     model.add(LeakyReLU(alpha=0.2))
-    model.add(Reshape((dim, dim, depth)))
 
-    model.add(Conv2D(depth*1, (5, 5), strides=(2, 2), padding="same", data_format='channels_last'))
+    model.add(Conv2D(depth*1, (5, 5), strides=(2, 2), padding="same"))
     model.add(LeakyReLU(alpha=0.2))
 
     model.add(Conv2D(depth*2, (5, 5), strides=(2,2), padding='same'))
@@ -56,9 +58,10 @@ def build_conv_critic(img_shape,num_classes):
     print ("label.shape ", label.shape)
     label_embedding = Flatten()(Embedding(num_classes, np.prod(img_shape))(label))
     print ("label_embedding.shape ", label_embedding.shape)
-    flat_img = Flatten()(img)
-    print ("flat_img.shape ", flat_img.shape)
-    model_input = multiply([flat_img, label_embedding])
+
+    label_embedding = Reshape(img_shape)(label_embedding)
+
+    model_input = multiply([img, label_embedding])
     print ("model_input.shape ", model_input.shape)
 
     validity = model(model_input)

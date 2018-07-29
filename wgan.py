@@ -148,7 +148,7 @@ class GAN:
         for i in range(r):
             for j in range(c):
                 axs[i,j].imshow(gen_imgs[cnt, :,:,:])
-                axs[i,j].set_title("Label: %d" % sampled_labels[cnt])
+                axs[i,j].set_title("L: %d" % sampled_labels[cnt])
                 axs[i,j].axis('off')
                 cnt += 1
         fig.savefig("images/icon_%s.png" % epoch)
