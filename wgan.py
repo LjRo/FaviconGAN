@@ -128,20 +128,30 @@ class GAN:
         
         self.sample_images(strftime("%H-%M-%S", gmtime()),x,y)
 
-    def sample_images(self,epoch,r=5,c=5):
-        noise = np.random.normal(0, 1, (r * c, self.input_size))
+    def sample_images(self,epoch,r=5,c=0):
+        noise = 0
+        if c == 0:
+            noise = np.random.normal(0, 1, (r, self.input_size))
+        else:
+            noise = np.random.normal(0, 1, (r * c, self.input_size))
         gen_imgs = self.generator.predict(noise)
 
         # Rescale images 0 - 1
         gen_imgs = 0.5 * gen_imgs + 0.5
         #print(gen_imgs[0][:][:][:])
-        fig, axs = plt.subplots(r, c)
-        cnt = 0
-        for i in range(r):
-            for j in range(c):
-                axs[i,j].imshow(gen_imgs[cnt, :,:,:])
-                axs[i,j].axis('off')
-                cnt += 1
-        fig.savefig("images/icon_%s.png" % epoch)
-        plt.close()
+
+        if c == 0:
+            for i in range(r):
+                im = Image.fromarray(np.uint8(gen_imgs[i]*255))
+                im.save("images/batch/icon_%d.png" % i)
+        else:
+            fig, axs = plt.subplots(r, c)
+            cnt = 0
+            for i in range(r):
+                for j in range(c):
+                    axs[i,j].imshow(gen_imgs[cnt, :,:,:])
+                    axs[i,j].axis('off')
+                    cnt += 1
+            fig.savefig("images/icon_%s.png" % epoch)
+            plt.close()
 

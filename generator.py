@@ -35,7 +35,7 @@ def build_generator(input_size,img_shape):
 def build_conv_generator(input_size,img_shape): 
     channels = img_shape[2]
     dropout = 0.4
-    depth = 128
+    depth = 256
     dim = 4 
 
     model = Sequential()

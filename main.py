@@ -15,5 +15,8 @@ elif (len(sys.argv) == 5):
         wgan.generate(model,x,y)
 elif (len(sys.argv) == 4):
     if(sys.argv[1] == "load"):
-        critic_model = sys.argv[2]
-        gen_model = sys.arvg[1]
+        model_name = sys.argv[2]
+        x = int(sys.argv[3])
+        model = os.path.join("models",model_name)
+        wgan = wgan.GAN()
+        wgan.generate(model,x,0)

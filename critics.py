@@ -28,7 +28,7 @@ def build_critic(img_shape):
 def build_conv_critic(img_shape):
     model = Sequential()
 
-    depth = 32
+    depth = 64
     dropout = 0.4
     # In: 1 x 28 x 28, depth=1
     # Out: 1 x 10 x 10, depth=64
