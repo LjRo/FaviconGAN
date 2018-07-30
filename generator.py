@@ -36,7 +36,7 @@ def build_conv_generator(input_size,img_shape):
     channels = img_shape[2]
     dropout = 0.4
     depth = 32
-    dim = 4 
+    dim = 2
 
     model = Sequential()
 
@@ -64,7 +64,6 @@ def build_conv_generator(input_size,img_shape):
     model.add(BatchNormalization(momentum=0.8))
     model.add(Activation("relu"))
 
-    model.add(UpSampling2D(size=(2, 2), data_format="channels_last"))    
     model.add(Conv2D(channels, (5, 5), padding="same"))
     model.add(BatchNormalization(momentum=0.8))
     model.add(Activation("tanh"))
