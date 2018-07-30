@@ -35,22 +35,32 @@ def build_generator(input_size,img_shape):
 def build_conv_generator(input_size,img_shape): 
     channels = img_shape[2]
     dropout = 0.4
-    depth = 256
+    depth = 32
     dim = 4 
 
     model = Sequential()
 
-    model.add(Dense(dim*dim*depth, input_dim=input_size))
+    model.add(Dense(dim*dim*depth*8, input_dim=input_size))
     model.add(Activation('relu'))
-    model.add(Reshape((dim, dim, depth)))
+    model.add(Reshape((dim, dim, depth*8)))
     
     model.add(UpSampling2D(size=(2, 2), data_format="channels_last"))    
-    model.add(Conv2D(128, (5, 5), padding="same"))
+    model.add(Conv2D(depth*8, (5, 5), padding="same"))
     model.add(BatchNormalization(momentum=0.8))
     model.add(Activation("relu"))
 
     model.add(UpSampling2D(size=(2, 2), data_format="channels_last"))    
-    model.add(Conv2D(64, (5, 5), padding="same"))
+    model.add(Conv2D(depth*4, (5, 5), padding="same"))
+    model.add(BatchNormalization(momentum=0.8))
+    model.add(Activation("relu"))
+
+    model.add(UpSampling2D(size=(2, 2), data_format="channels_last"))    
+    model.add(Conv2D(depth*2, (5, 5), padding="same"))
+    model.add(BatchNormalization(momentum=0.8))
+    model.add(Activation("relu"))
+
+    model.add(UpSampling2D(size=(2, 2), data_format="channels_last"))    
+    model.add(Conv2D(depth*1, (5, 5), padding="same"))
     model.add(BatchNormalization(momentum=0.8))
     model.add(Activation("relu"))
 
